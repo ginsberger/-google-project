@@ -13,4 +13,3 @@ class AutoCompleteData:
         return self.source_text
 
 
-

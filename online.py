@@ -1,17 +1,11 @@
 import string
-from collections import defaultdict, namedtuple
-from AutoCompleteData import AutoCompleteData
-from pathlib import Path
+from auto_complete_data import AutoCompleteData
 
-from utils import format_line, all_sub_words
-from score import get_score, is_best_score
+from offline import data_dict, sentences
 
 
-subString = namedtuple('subString', ['id', 'score', 'offset'])
-sentence_path = namedtuple('sentence_url', ['sentence', 'path'])
-sentences_id = 0
-sentences = {}
-data_dict = defaultdict(list)
+def get_score(word, decrease):
+    return len(word)*2 - decrease
 
 
 def replace_char(word, start, end):
@@ -42,7 +36,6 @@ def add_missed_char(word, start, end):
             if word.replace(word[index], word[index] + i) in data_dict.keys():
                 detraction = (5 - index) if index < 5 else 1
                 return word.replace(word[index], word[index] + i),  detraction*2
-
     return None, 0
 
 
@@ -56,6 +49,12 @@ def find_sequence(string):
     detraction = 0
     senten = data_dict[string][:5]
     result = [AutoCompleteData(sentences[index.id].sentence, sentences[index.id].path, index.offset, get_score(string, detraction)) for index in senten]
+
+    # if there are not enough suitable sequences
+    # the best scores given when replacing a character Except from the first character
+    # the next best case is delete or add the 4th character
+    # after try to replace the first character
+    # and the final try is to delete or add a character
 
     if len(result) < 5:
         if len(string) > 1:
@@ -88,40 +87,4 @@ def find_sequence(string):
 
     return result[:5]
 
-
-def read_data(file_name):
-    x_file = open(file_name, "r")
-    x_line = x_file.read().splitlines()
-    global sentences_id
-    line_number = 1
-    for line in x_line:
-        line_ = format_line(line)
-        sub_words = all_sub_words(line_)
-        sentences[sentences_id] = sentence_path(line, file_name)
-
-        for word in sub_words:
-            # prevent duplication of sentences
-            if line not in [sentences[sentence_.id].sentence for sentence_ in data_dict[word]]:
-                if len(data_dict[word]) < 5:
-                    data_dict[word].append(subString(sentences_id, 0, line_number))
-
-                else:
-                    is_best_score(word, data_dict[word])
-        sentences_id += 1
-        line_number += 1
-
-
-def init():
-    directory_list = ["c-api"]
-
-    while len(directory_list) != 0:
-        base_path = Path(directory_list.pop(-1))
-
-        for entry in base_path.iterdir():
-            if entry.is_dir():
-                directory_list.append(entry)
-
-            else:
-                print(entry)
-                read_data(entry)
 
