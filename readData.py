@@ -81,26 +81,29 @@ def read_data(file_name):
     for line in x_line:
         line_ = format_line(line)
         sub_words = all_sub_words(line_)
-
-        for word in sub_words:
-            # if sentences_index not in data_dict[sentences[sentences_index].sentence]:
-            if len(data_dict[word]) < 5:
-                data_dict[word].append(subString(sentences_index, line_.index(word)))
-            else:
-                is_best_score(word, data_dict[word]) # alfa
-
         sentences[sentences_index] = sentence_path(line, file_name)
+        for word in sub_words:
+            # prevent duplication of sentences
+            if line not in [sentences[sentence_.id].sentence for sentence_ in data_dict[word]]:
+                if len(data_dict[word]) < 5:
+                    data_dict[word].append(subString(sentences_index, line_.index(word)))
+                else:
+                    is_best_score(word, data_dict[word]) # alfa
+
         sentences_index += 1
 
 
 def init():
 
     directory_list = ["c-api"]
+
     while len(directory_list) != 0:
-        basepath = Path(directory_list.pop(-1))
-        for entry in basepath.iterdir():
+        base_path = Path(directory_list.pop(-1))
+
+        for entry in base_path.iterdir():
             if entry.is_dir():
                 directory_list.append(entry)
+
             else:
                 print(entry)
                 read_data(entry)
@@ -118,8 +121,10 @@ if __name__ == '__main__':
             suggestions = find_sequence(x)
             if suggestions:
                 print(f"There are {len(suggestions)} suggestions")
+
                 for i in range(len(suggestions)):
                     print(f'{i + 1}. {suggestions[i].get_complete_sentence()} , path = {suggestions[i].get_source_text()}')
+
             else:
                 print("There are'nt suggestions")
             print(x, end='')
