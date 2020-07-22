@@ -10,10 +10,20 @@ sentences = {}
 data_dict = defaultdict(list)
 
 
-def find_sequence(string):
-    indexes = data_dict[string][:5]
+def replace_char(word):
+    for char in word:
+        for i in string.ascii_lowercase:
+            if word.replace(char, i, 1) in data_dict.keys():
+                return word.replace(char, i, 1)
+    return None
 
-    return [AutoCompleteData(sentences[index.id].sentence, sentences[index.id].path, index.offset, get_score(sentences[index.id].sentence, string)) for index in indexes]
+
+def find_sequence(string):
+    senten = data_dict[string][:5]
+    if len(senten) < 5:
+        fix_word = replace_char(string)
+        senten += data_dict[fix_word][:(5 - len(senten))]
+    return [AutoCompleteData(sentences[index.id].sentence, sentences[index.id].path, index.offset, get_score(sentences[index.id].sentence, string)) for index in senten]
 
 
 def get_score(sentences, string, decrease=0):
@@ -38,23 +48,20 @@ def all_sub_words(line):
 #     return False
 
 
-def replace_char(word):
-    pass
-    # word = word[::-1]
-    # for index, char in enumerate(word):
-    #     for i in string.ascii_lowercase:
-    #         if word.replace(char, i) in sentences[index].sentence[::-1]:# ?
-    #             return index
-    # return -1
+
 
 
 def delete_unnecessary_char(word):
-    pass
-    # word = word[::-1]
-    # for index, char in enumerate(word):
-    #     if word.replace(char, "") in sentences[index].sentence[::-1]:
-    #         return word.index(char)
-    # return -1
+    # pass
+    word = word[::-1]
+    for char in word:
+        print(word.replace(char, "", 1)[::-1])
+        print([sentences[sentence_.id].sentence for sentence_ in data_dict[word]][::-1])
+        print(data_dict[word])
+        if word.replace(char, "", 1) in data_dict.keys():
+        # if word.replace(char, "", 1) in [sentences[sentence_.id].sentence for sentence_ in data_dict[word.replace(char, "", 1)]][::-1]:
+            return len(sentences[0]) - word.index(char)
+    return -1
 
 
 def add_missed_char(word):
@@ -113,6 +120,7 @@ if __name__ == '__main__':
 
     print("Loading the file and preparing the system....")
     init()
+    print(delete_unnecessary_char("ffunction"))
     x = input("The system is ready. Enter your text:")
     while x:
 
