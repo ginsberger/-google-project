@@ -13,8 +13,29 @@ data_dict = defaultdict(list)
 def replace_char(word):
     for char in word:
         for i in string.ascii_lowercase:
+
             if word.replace(char, i, 1) in data_dict.keys():
                 return word.replace(char, i, 1)
+
+    return None
+
+
+def delete_unnecessary_char(word):
+    for char in word:
+        if word.replace(char, "", 1) in data_dict.keys():
+            return word.replace(char, "", 1)
+
+    return None
+
+
+def add_missed_char(word):
+    for char in word:
+
+        for i in string.ascii_lowercase:
+
+            if word.replace(char, char + i) in data_dict.keys():
+                return word.replace(char, char + i)
+
     return None
 
 
@@ -23,6 +44,11 @@ def find_sequence(string):
     if len(senten) < 5:
         fix_word = replace_char(string)
         senten += data_dict[fix_word][:(5 - len(senten))]
+
+    if len(senten) < 5:
+        fix_word = delete_unnecessary_char(string)
+        senten += data_dict[fix_word][:(5 - len(senten))]
+
     return [AutoCompleteData(sentences[index.id].sentence, sentences[index.id].path, index.offset, get_score(sentences[index.id].sentence, string)) for index in senten]
 
 
@@ -48,32 +74,6 @@ def all_sub_words(line):
 #     return False
 
 
-
-
-
-def delete_unnecessary_char(word):
-    # pass
-    word = word[::-1]
-    for char in word:
-        print(word.replace(char, "", 1)[::-1])
-        print([sentences[sentence_.id].sentence for sentence_ in data_dict[word]][::-1])
-        print(data_dict[word])
-        if word.replace(char, "", 1) in data_dict.keys():
-        # if word.replace(char, "", 1) in [sentences[sentence_.id].sentence for sentence_ in data_dict[word.replace(char, "", 1)]][::-1]:
-            return len(sentences[0]) - word.index(char)
-    return -1
-
-
-def add_missed_char(word):
-    pass
-    # word = word[::-1]
-    # for index, char in enumerate(word):
-    #     for i in string.ascii_lowercase:
-    #         if word.replace(char, char + i) in sentences[index].sentence[::-1]:
-    #             return index + 1
-    # return -1
-
-
 def is_best_score(new_sentence, sentences):
     for sentence in sentences:
         # choose the best score
@@ -89,11 +89,14 @@ def read_data(file_name):
         line_ = format_line(line)
         sub_words = all_sub_words(line_)
         sentences[sentences_index] = sentence_path(line, file_name)
+
         for word in sub_words:
             # prevent duplication of sentences
             if line not in [sentences[sentence_.id].sentence for sentence_ in data_dict[word]]:
+
                 if len(data_dict[word]) < 5:
                     data_dict[word].append(subString(sentences_index, line_.index(word)))
+
                 else:
                     is_best_score(word, data_dict[word]) # alfa
 
