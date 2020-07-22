@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 from pathlib import Path
+import zipfile
 
 from utils import format_line, all_sub_words
 
@@ -12,31 +13,32 @@ data_dict = defaultdict(list)
 
 
 def read_data(file_name):
-    x_file = open(file_name, "r")
-    x_line = x_file.read().splitlines()
-    global sentences_id
-    line_number = 1
+    with open(file_name, "r") as x_file:
 
-    for line in x_line:
-        line_ = format_line(line)
-        sub_words = all_sub_words(line_)
-        sentences[sentences_id] = sentence_path(line, file_name)
+        x_line = x_file.read().splitlines()
+        global sentences_id
+        line_number = 1
 
-        for word in sub_words:
-            # prevent duplication of sentences
-            if line not in [sentences[sentence_.id].sentence for sentence_ in data_dict[word]]:
+        for line in x_line:
+            line_ = format_line(line)
+            sub_words = all_sub_words(line_)
+            sentences[sentences_id] = sentence_path(line, file_name)
 
-                if len(data_dict[word]) < 5:
-                    data_dict[word].append(subString(sentences_id, 0, line_number))
+            for word in sub_words:
+                # prevent duplication of sentences
+                if line not in [sentences[sentence_.id].sentence for sentence_ in data_dict[word]]:
 
-        sentences_id += 1
-        line_number += 1
+                    if len(data_dict[word]) < 5:
+                        data_dict[word].append(subString(sentences_id, 0, line_number))
+
+            sentences_id += 1
+            line_number += 1
 
 
 def init():
 
     directory_list = ["c-api"]
-
+    # with zipfile.ZipFile('c-api.zip') as z:
     while len(directory_list) != 0:
         base_path = Path(directory_list.pop(-1))
 
