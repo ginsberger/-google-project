@@ -26,7 +26,7 @@ def add_missed_char(index, char, word):
 
 @change_decrator
 def replace_char(index, char, word):
-    return word[:index-1] + char + word[index+1:]
+    return word[:index] + char + word[index+1:]
 
 
 def delete_unnecessary_char(word, start, end):
